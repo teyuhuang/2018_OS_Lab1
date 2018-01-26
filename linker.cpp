@@ -8,6 +8,7 @@ using namespace std;
 struct symbolTable{
     map<string, int> symTableAddress;
     map<string, int> symTableUsage;
+    vector<string> order;
 
     int lookup(string s){
         try{
@@ -36,7 +37,15 @@ struct symbolTable{
         if(lookup(s)>0) return false;
         symTableAddress.insert({s,addr});
         symTableUsage.insert({s,0});
+        order.push_back(s);
         return true;
+    }
+    string table2String(){
+        string output = "Symbol Table\n";
+        for(string s: order){
+            output+=s+'='+to_string(lookup(s))+"\n";
+        }
+        return output;
     }
     
 
@@ -44,9 +53,18 @@ struct symbolTable{
 struct contentParser{
     string content = "";
     int length = 0;
+
+    /*Indices to trace the file*/
     int currentIdx = 0;
-    int currentLineNum = 0;
+    int nextIdx = -1;
+
+    int currentLineNum = 1;
+    int nextLineNumber = 1;
+
     int currentLineOffset = 1;
+    int nextLineOffset = 0;
+
+
     contentParser(string input){
         content = input;
         length = input.size();
@@ -64,8 +82,53 @@ struct contentParser{
         if(!(('a'<=first&&first<='z')||('A'<=first&&first<='Z'))) return false;
         return true;
     }
-    string getLine(){
-        
+    string getToken(){
+        currentIdx = nextIdx+1;
+        currentLineOffset = nextLineOffset+1;
+        currentLineNum = nextLineNumber;
+        //locate currentIdx
+        while(currentIdx < length){
+            char c = content.at(currentIdx);
+            if(c == ','|| c == ' ' || c == '\t'){
+                currentIdx++;
+                currentLineOffset++;
+            }
+            else if(c == '\n'){
+                currentIdx++;
+                currentLineOffset = 1;
+                currentLineNum++;
+            }
+            else break;
+        }
+
+        //locate nexIdx;
+        nextIdx = currentIdx+1;
+        nextLineOffset = currentLineOffset+1;
+        nextLineNumber = currentLineNum;
+        while(nextIdx < length){
+            char c = content.at(nextIdx);
+            if(c == ','|| c == ' ' || c == '\t'){
+               break;
+            }
+            else if(c == '\n'){
+                nextLineNumber++;
+                nextLineOffset = 0;
+                break;
+            }
+            else{
+                nextLineOffset++;
+                nextIdx++;
+            }
+        }
+        if(currentIdx<length){
+            if(nextIdx<length)
+                return content.substr(currentIdx, nextIdx-currentIdx);
+            else
+                return content.substr(currentIdx, length-currentIdx-1);
+        }
+        else{
+            return "";
+        }
     }
 };
 string FILENAME;
@@ -124,8 +187,20 @@ int main (int argc, char* argv[]) {
     /*From now, file has been read into fileContent and ready for 1st pass*/
 
     contentParser cp(fileContent);
-    cout<<cp.isLegalSymbol("A1239092S")<<endl;
     symbolTable st;
+    
+    string tmp = cp.getToken();
+    while(tmp.size()>0){
+        cout<<"\""<<tmp<<"\" l:"<<cp.currentLineNum<<" offset:"<<cp.currentLineOffset<<"  nl:"<<cp.nextLineNumber<<"nof:"<<cp.nextLineOffset<<endl;
+        tmp = cp.getToken();
+    }
+
+
+    // st.add("asdfasf",10);
+    // st.add("sadfasfa2",30);
+    // st.add("sadfasfa3",12);
+    // st.add("sadfasfa4",78);
+    // cout<<st.table2String();
 
     
   return 0;
