@@ -4,15 +4,13 @@
 #include <vector>
 using namespace std;
 
+void test(){
+  cout<<"before exit"<<endl;
+  exit(0);
+  cout<<"after exit"<<endl;
+}
+
 int main () {
-  ifstream myfile;
-  myfile.open ("iexample.txt");
-  myfile.close();
-  vector<string> strV;
-  strV.push_back("asdf");
-  strV.push_back("asdfads");
-  for(auto a: strV){
-   cout<<a<<endl;
-  }
+  test();
   return 0;
 }
