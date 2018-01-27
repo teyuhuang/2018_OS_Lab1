@@ -5,9 +5,7 @@
 using namespace std;
 
 void test(){
-  cout<<"before exit"<<endl;
-  exit(0);
-  cout<<"after exit"<<endl;
+  cout<<5300/1000<<endl;
 }
 
 int main () {
