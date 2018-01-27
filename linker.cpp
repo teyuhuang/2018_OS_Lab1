@@ -120,6 +120,7 @@ struct contentTool{
 
     int currentIdx = 0;
     int nextIdx = -1;
+    int prevNextIdx = 0;
 
     int prevLineNum = 1;
     int currentLineNum = 1;
@@ -170,8 +171,30 @@ struct contentTool{
     int s2i(string s){
         return stoi(s,nullptr,10);
     }
-    
+    pair<int, int> findLastLineNumAndOffset(){
+        int lineNum = prevLineNum;
+        int idx = prevNextIdx;
+        int offset = prevRealNextOffset;
+
+        if(idx == length || idx == length -1) return {lineNum,offset};
+        else{
+            char prev = content.at(idx++);
+            while(idx<length){
+                if(prev == ','|| prev == ' ' || prev == '\t'){
+                    offset++;
+                }
+                else if(prev == '\n'){
+                    lineNum++;
+                    offset = 1;
+                } 
+                prev = content.at(idx);
+                idx++;
+            }
+        }
+        return {lineNum,offset};
+    }
     string getToken(){
+        prevNextIdx = nextIdx;
         prevLineNum = currentLineNum;
         prevRealNextOffset = realNextOffset;
         currentIdx = nextIdx+1;
@@ -230,8 +253,10 @@ struct contentTool{
     string readSym(){
         string t = getToken();
         if(!isLegalSymbol(t)){
-            if(t.size()<=0)
-                __parseerror(1,prevLineNum,prevRealNextOffset);
+            if(t.size()<=0){
+                auto lo = findLastLineNumAndOffset();
+                __parseerror(1,lo.first,lo.second);
+            }
             else   
                 __parseerror(1,currentLineNum,currentLineOffset);
         }
@@ -243,8 +268,10 @@ struct contentTool{
     int readInt(){
         string t = getToken();
         if(!isNumber(t)){
-            if(t.size()<=0)
-                __parseerror(0,prevLineNum,prevRealNextOffset);
+            if(t.size()<=0){
+            auto lo = findLastLineNumAndOffset();
+                __parseerror(0,lo.first,lo.second);
+            }
             else   
                 __parseerror(0,currentLineNum,currentLineOffset);
         }
@@ -252,8 +279,10 @@ struct contentTool{
     }
     char readAddr(){
         string t = getToken();
-        if(t.size()<=0)
-            __parseerror(2,prevLineNum,prevRealNextOffset);
+        if(t.size()<=0){
+            auto lo = findLastLineNumAndOffset();
+            __parseerror(2,lo.first,lo.second);
+        }
         else if(t.size()>1 || !((t.at(0) == 'A')||(t.at(0) == 'E')||(t.at(0) == 'I')||(t.at(0) == 'R')))
             __parseerror(2,currentLineNum,currentLineOffset);
         
@@ -341,7 +370,7 @@ struct pass1And2{
         string symbol= ct.readSym(); 
         modl.useList.push_back({symbol, false});
     }
-    
+
     void readInstrList(contentTool& ct, symbolTable& st, module& modl){
         int numInstrs=ct.readInt();
         modl.length = numInstrs;
