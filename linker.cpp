@@ -7,6 +7,7 @@
 #define SYMBOL_LENGTH_LIMIT 16
 
 using namespace std;
+string FILENAME;
 void print_symbol_table(){
     cout<<"Symbol Table"<<endl;
 }
@@ -26,7 +27,6 @@ void __parseerror(int errcode, int linenum, int lineoffset) {
     printf("Parse Error line %d offset %d: %s\n", linenum, lineoffset, errstr[errcode].c_str());
     exit(0);
 }
-string FILENAME;
 string readFile2String(string filename){
     ifstream inFile;
     try {
@@ -109,8 +109,6 @@ struct symbolTable{
         }
         return output;
     }
-    
-
 };
 struct contentTool{
     string content = "";
@@ -290,16 +288,16 @@ struct contentTool{
     }
 };
 struct module{
-    module(int b, int i){
-        base = b;
-        id = i;
-    }
     int base = 0;
     int id = 0;
     int numOfSymbol = 0;
     int length = 0;
     vector<pair<string, int>> defList;
     vector<pair<string, bool>> useList;
+    module(int b, int i){
+        base = b;
+        id = i;
+    }
     void checkSymbolRelativeError(symbolTable& st){
         for(auto sym: defList){ 
             if(sym.second>=length){
@@ -353,8 +351,6 @@ struct pass1And2{
             }
         }
     }
-
-
     void readUseList(contentTool& ct, symbolTable& st, module& modl){
         int numUses=ct.readInt();
         if(pass1or2 == 1){
@@ -450,7 +446,6 @@ struct pass1And2{
         }
     }
 
-    
     void pass1(contentTool& ct, symbolTable& st){
         pass1or2 = 1;
         numOfInstrucs = 0;
@@ -502,10 +497,9 @@ int main (int argc, char* argv[]) {
 
     symbolTable st;
     pass1And2 pass12;
-    /*First Pass*/
 
+    /*First Pass*/
     contentTool ct(FILENAME); // Read in the file for the 1st time
-    
     if(ct.isBlankFile(0)){
         print_symbol_table();
         print_memory_map();

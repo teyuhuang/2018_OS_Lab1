@@ -1,3 +1,10 @@
-Linker
+=======IMPORTANT======
+Pleas use gcc 6.2.0 or above
+module load gcc-6.2.0
+======================
+
+Usage: command "make" to compile linker.cpp and generate a binary executible "linker"
+
+       command "make clear" to remove binary executible "linker"
 
 Edison Huang N15452363
